@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #eaf3f4;
+            padding: 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 50%;
+            width: 200px;
+            margin: 0 auto;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .filters div {
+            display: inline-block;
+            background-color: #ffcd67;
+            padding: 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffebad;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #ffd16a;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .pagination span {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .statistics {
+            margin-top: 30px;
+            background-color: #ffebad;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .statistics h2 {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        .statistics p {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Transaction Dashboard</h1>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div id="search-box">
+            <label for="search-transaction">Search transaction</label><br>
+            <input type="text" id="search-transaction" placeholder="Search...">
+        </div>
+        <div id="month-dropdown">
+            <label for="month-select">Select Month</label><br>
+            <select id="month-select">
+                <option value="Jan">January</option>
+                <option value="Feb">February</option>
+                <option value="Mar" selected>March</option>
+                <!-- More month options -->
+                <option value="Dec">December</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>Sold</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-table-body">
+                <!-- Transactions will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <button id="prev-page" disabled>Previous</button>
+        <span>Page No: 1</span>
+        <button id="next-page">Next</button>
+        <span>Per Page: 10</span>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="statistics">
+        <h2>Statistics - <span id="selected-month-stat">March</span></h2>
+        <p>Total Sale: <span id="total-sale">0</span></p>
+        <p>Total Sold Items: <span id="total-sold">0</span></p>
+        <p>Total Not Sold Items: <span id="total-not-sold">0</span></p>
+    </div>
+</div>
+
+<script>
+    // Initial Data and Setup
+    const transactionsAPI = 'your-api-endpoint'; // Replace with actual API
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Fetch transactions based on the selected month
+    function fetchTransactions(month, searchQuery = '') {
+        // Use API to fetch data, simulate for now
+        const dummyTransactions = [
+            { id: 1, title: 'Transaction 1', description: 'Description 1', price: 100, category: 'A', sold: 'Yes', image: 'img1.png' },
+            { id: 2, title: 'Transaction 2', description: 'Description 2', price: 200, category: 'B', sold: 'No', image: 'img2.png' }
+            // More simulated data
+        ];
+        
+        const filteredTransactions = dummyTransactions.filter(transaction => {
+            return transaction.title.includes(searchQuery) ||
+                   transaction.description.includes(searchQuery) ||
+                   transaction.price.toString().includes(searchQuery);
+        });
+        
+        displayTransactions(filteredTransactions);
+        updateStatistics(filteredTransactions);
+    }
+
+    // Display transactions in the table
+    function displayTransactions(transactions) {
+        const tableBody = document.getElementById('transaction-table-body');
+        tableBody.innerHTML = '';
+
+        transactions.forEach(transaction => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${transaction.id}</td>
+                <td>${transaction.title}</td>
+                <td>${transaction.description}</td>
+                <td>${transaction.price}</td>
+                <td>${transaction.category}</td>
+                <td>${transaction.sold}</td>
+                <td><img src="${transaction.image}" alt="Image" width="50"></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Update statistics based on the transactions
+    function updateStatistics(transactions) {
+        const totalSale = transactions.reduce((acc, transaction) => acc + transaction.price, 0);
+        const totalSold = transactions.filter(transaction => transaction.sold === 'Yes').length;
+        const totalNotSold = transactions.filter(transaction => transaction.sold === 'No').length;
+
+        document.getElementById('total-sale').textContent = totalSale;
+        document.getElementById('total-sold').textContent = totalSold;
+        document.getElementById('total-not-sold').textContent = totalNotSold;
+    }
+
+    // Event Listeners
+    document.getElementById('month-select').addEventListener('change', function() {
+        const selectedMonth = this.value;
+        document.getElementById('selected-month-stat').textContent = selectedMonth;
+        fetchTransactions(selectedMonth);
+    });
+
+    document.getElementById('search-transaction').addEventListener('input', function() {
+        const searchQuery = this.value;
+        const selectedMonth = document.getElementById('month-select').value;
+        fetchTransactions(selectedMonth, searchQuery);
+    });
+
+    document.getElementById('next-page').addEventListener('click', function() {
+        currentPage++;
+        // Fetch next page data
+    });
+
+    document.getElementById('prev-page').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            // Fetch previous page data
+        }
+    });
+
+    // Initial load for March
+    fetchTransactions('Mar');
+
+</script>
+
+</body>
+</html>
